@@ -9,13 +9,17 @@ BankAccount::BankAccount(std::string sAccountName, std::string sAccountSurname, 
 	this->sIban = sAccountIban;
 }
 
+////// DESTRUCTOR
+
+BankAccount::~BankAccount() {}
+
 ////// GETTERS
 
-std::string BankAccount::sGetName() { return sName; }
-std::string BankAccount::sGetSurname() { return sSurname; }
-CURRENCY BankAccount::eGetCurrency() { return eCurrency; }
-std::string BankAccount::sGetIban() { return sIban; }
-double BankAccount::fGetBalance() { return fBalance; }
+inline std::string BankAccount::sGetName() const { return sName; }
+inline std::string BankAccount::sGetSurname() const { return sSurname; }
+inline CURRENCY BankAccount::eGetCurrency() const { return eCurrency; }
+inline std::string BankAccount::sGetIban() const { return sIban; }
+inline double BankAccount::fGetBalance() const { return fBalance; }
 
 ////// SETTERS
 

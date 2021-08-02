@@ -17,12 +17,15 @@ public:
 	////// CONSTRUCTORS
 	BankAccount(std::string sAccountName, std::string sAccountSurname, std::string sAccountIban);
 
+	////// DESTRUCTOR
+	~BankAccount();
+
 	////// GETTERS
-	std::string sGetName();
-	std::string sGetSurname();
-	CURRENCY eGetCurrency();
-	std::string sGetIban();
-	double fGetBalance();
+	inline std::string sGetName() const;
+	inline std::string sGetSurname() const;
+	inline CURRENCY eGetCurrency() const;
+	inline std::string sGetIban() const;
+	inline double fGetBalance() const;
 
 	////// SETTERS
 	void sSetName(std::string sAccountName);
