@@ -10,11 +10,12 @@ class Bank
 public:
 	Bank();
 	~Bank();
-	void vAddAccount();
-
 
 private:
 	std::vector<BankAccount*> vBankAccounts;
 	std::string createIban();
+	void vAddAccount();
+	void vSeeAccounts() const;
+	void mainMenu();
 
 };

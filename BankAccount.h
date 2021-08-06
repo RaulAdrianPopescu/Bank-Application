@@ -21,11 +21,11 @@ public:
 	~BankAccount();
 
 	////// GETTERS
-	inline std::string sGetName() const;
-	inline std::string sGetSurname() const;
-	inline CURRENCY eGetCurrency() const;
-	inline std::string sGetIban() const;
-	inline double fGetBalance() const;
+	std::string sGetName() const;
+	std::string sGetSurname() const;
+	CURRENCY eGetCurrency() const;
+	std::string sGetIban() const;
+	double fGetBalance() const;
 
 	////// SETTERS
 	void sSetName(std::string sAccountName);
