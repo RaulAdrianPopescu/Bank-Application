@@ -2,7 +2,7 @@
 
 Bank::Bank()
 {
-
+    this->mainMenu();
 }
 
 Bank::~Bank()
@@ -24,6 +24,21 @@ void Bank::vAddAccount()
 
 	BankAccount* account = new BankAccount(sName, sSurname, sIban);
 	vBankAccounts.push_back(account);
+
+    std::cout << "\n1 -> Pentru a mai adauga un cont\n";
+    std::cout << "2 -> Pentru a reveni in meniul principal\n";
+    int iOption = 0;
+    std::cin >> iOption;
+    
+    switch (iOption)
+    {
+    case 1:
+        system("CLS");
+        vAddAccount();
+        break;
+    default: 
+        break;
+    }
 }
 
 void Bank::vSeeAccounts() const
@@ -31,12 +46,16 @@ void Bank::vSeeAccounts() const
 	std::cout << "Numarul de conturi din baza de data a bancii este: " << vBankAccounts.size();
 	std::cout << "\n\n";
 
-	for (int i = 0; i < vBankAccounts.size(); i++)
-	{
-		std::cout << "Contul " << i + 1 << ": " << vBankAccounts[i]->sGetName()
-			      << ' ' << vBankAccounts[i]->sGetSurname()
-			      << "       " << vBankAccounts[i]->sGetIban() << '\n';
-	}
+    if (!vBankAccounts.empty())
+    {
+        for (int i = 0; i < vBankAccounts.size(); i++)
+        {
+            std::cout << "Contul " << i + 1 << ": " << vBankAccounts[i]->sGetName()
+                      << ' ' << vBankAccounts[i]->sGetSurname()
+                      << "       " << vBankAccounts[i]->sGetIban() << '\n';
+        }
+    }
+    else { std::cout << "NU A FOST INREGISTRAT NICIUN CONT IN BAZA DE DATE!\n"; }
 }
 
 void Bank::mainMenu()
@@ -61,9 +80,6 @@ void Bank::mainMenu()
         {
         case 1:
             this->vAddAccount();
-
-            int addAccountOption{ 0 };
-
             break;
         case 2:
             this->vSeeAccounts();
