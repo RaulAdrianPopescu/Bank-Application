@@ -4,9 +4,9 @@
 
 BankAccount::BankAccount(std::string sAccountName, std::string sAccountSurname, std::string sAccountIban)
 {
-	this->sName = sAccountName;
-	this->sSurname = sAccountSurname;
-	this->sIban = sAccountIban;
+	sName = sAccountName;
+	sSurname = sAccountSurname;
+	sIban = sAccountIban;
 }
 
 ////// DESTRUCTOR
