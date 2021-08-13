@@ -14,20 +14,20 @@ class BankAccount
 {
 public:
 
-	////// CONSTRUCTORS
+	////// CONSTRUCTOR(S)
 	BankAccount(std::string sAccountName, std::string sAccountSurname, std::string sAccountIban);
 
 	////// DESTRUCTOR
 	~BankAccount();
 
-	////// GETTERS
+	////// GETTER(S)
 	std::string sGetName() const;
 	std::string sGetSurname() const;
 	CURRENCY eGetCurrency() const;
 	std::string sGetIban() const;
 	double fGetBalance() const;
 
-	////// SETTERS
+	////// SETTER(S)
 	void sSetName(std::string sAccountName);
 	void sSetSurname(std::string sAccountSurname);
 	void eSetCurrency(CURRENCY eAccountCurrency);
@@ -35,6 +35,8 @@ public:
 	void fSetBalance(double fAccountBalance);
 
 private:
+
+	////// FIELD(S)
 	std::string sName = "Undefined";
 	std::string sSurname = "Undefined";
 	CURRENCY eCurrency = CURRENCY::UNKNOWN;

@@ -1,13 +1,38 @@
 #include "Bank.h"
+#include <ctime>
 
-Bank::Bank()
+/////////////////  BANK \\\\\\\\\\\\\\\\\\
+
+////// CONSTRUCTOR(S)
+Bank::Bank() 
 {
-    mainMenu();
 }
 
-Bank::~Bank()
+////// DESTRUCTOR
+Bank::~Bank() { vBankAccounts.clear(); }
+
+////// METHOD(S)
+
+CURRENCY Bank::eSelectCurrency()
 {
-	vBankAccounts.clear();
+    std::cout << "Alegeti moneda contului din lista de mai jos: ";
+    std::cout << "\n\n1->EURO\n";
+    std::cout << "2->DOLLAR\n";
+    std::cout << "3->RON\n";
+    std::cout << "\nSelectie: ";
+    int iChosenCurrency; std::cin >> iChosenCurrency;
+
+    switch (iChosenCurrency)
+    {
+    case 1:
+        return CURRENCY::EURO;
+    case 2:
+        return CURRENCY::DOLLAR;
+    case 3:
+        return CURRENCY::RON;
+    default:
+        return CURRENCY::UNKNOWN;
+    }
 }
 
 void Bank::vAddAccount()
@@ -20,7 +45,12 @@ void Bank::vAddAccount()
 	std::string sName;
 	std::cin >> sName;
 
-	std::string sIban;
+    std::string sIban{sCreateIban()};
+    if (sIban == "IBAN invalid.\n")
+    {
+        std::cout << "Selectia este invalida. Incercati din nou.\n\n";
+        sIban = sCreateIban();
+    }
 
 	BankAccount* account = new BankAccount(sName, sSurname, sIban);
 	vBankAccounts.push_back(account);
@@ -41,9 +71,52 @@ void Bank::vAddAccount()
     }
 }
 
+std::string Bank::sCreateIban()
+{
+    std::string sIban[6]{ "RO", "ITBK" };
+
+    CURRENCY eUserCurrency{eSelectCurrency()};
+
+    for (int i = 5; i > 2; i--)
+    {
+        (i == 5) ? srand(time(NULL)) : srand(std::stoi(sIban[i + 1]));
+
+        sIban[i] = std::to_string(rand() % 9999 + 1000);
+    }
+
+    switch (eUserCurrency)
+    {
+    case CURRENCY::UNKNOWN:
+        return "IBAN invalid.\n";
+    case CURRENCY::EURO:
+        sIban[2] = "EEUR";
+        break;
+    case CURRENCY::DOLLAR:
+        sIban[2] = "EUSD";
+        break;
+    case CURRENCY::RON:
+    {
+        srand(std::stoi(sIban[3]));
+        sIban[2] = std::to_string(rand() % 8999 + 1000);
+    }
+        break;
+    default:
+        break;
+    }
+
+    srand(time(NULL) + std::stoi(sIban[4])); std::string sValidationCode = std::to_string(rand() % 89 + 10);
+    sIban[0] += sValidationCode;
+
+    std::string sGeneratedIban;
+    for (auto sequence : sIban)
+        sGeneratedIban += sequence;
+
+    return sGeneratedIban;
+}
+
 void Bank::vSeeAccounts() const
 {
-	std::cout << "Numarul de conturi din baza de data a bancii este: " << vBankAccounts.size();
+	std::cout << "Numarul de conturi din baza de date a bancii este: " << vBankAccounts.size();
 	std::cout << "\n\n";
 
     if (!vBankAccounts.empty())
@@ -191,20 +264,141 @@ void Bank::vModifyAccount()
     }
 }
 
-std::string Bank::createIban(CURRENCY userCurrency)
-{
-    //std::string sIban[6] {"RO", "ITBK"};
 
-    //switch (userCurrency)
-    //{
-    //case CURRENCY::RON:
-    //    {
-    //        srand()
-    //    }
-    //default:
-    //    std::cout << "!!!Asigurativa ca acestui cont i-a fost atribuit o moneda. Codul IBAN nu a fost generat!!!\n";
-    //    return NULL;
-    //}
-    return std::string();
-    
+
+/////////////////  USER ACCOUNT \\\\\\\\\\\\\\\\\\
+
+////// CONSTRUCTOR(S)
+UserAccount::UserAccount()
+{
+    system("cls");
+    std::string sNameInput, sPasswordInput;
+
+    while (true)
+    {
+        std::cout << "Introduceti numele utilizatorul: ";
+        std::getline(std::cin, sNameInput);
+        if (!bIsUserNameValid(sNameInput))
+            continue;
+
+        std::cout << "Introduceti parola utilizatorul: ";
+        std::getline(std::cin, sPasswordInput);
+        if (!bIsUserPasswordValid(sPasswordInput))
+            continue;
+        
+        break;
+    }
+
+    sSetUserName(sNameInput);
+    sSetUserPassword(sPasswordInput);
+
+    system("cls");
+}
+
+UserAccount::UserAccount(std::string sName, std::string sPassword)
+{
+        sSetUserName(sName);
+        sSetUserPassword(sPassword);
+}
+
+////// DESTRUCTOR
+UserAccount::~UserAccount() {}
+
+////// GETTER(S)
+std::string const UserAccount::sGetUserName(){ return sUserName; }
+std::string const UserAccount::sGetUserPassword(){ return sUserPassword; }
+
+////// SETTER(S)
+void UserAccount::sSetUserName(std::string& sInputName) { sUserName = sInputName; }
+void UserAccount::sSetUserPassword(std::string& sInputPassword) { sUserPassword = sInputPassword; }
+
+bool UserAccount::bIsUserNameValid(std::string sInputName)
+{
+    if (sInputName.size() >= 6 && sInputName.size() <= 16)
+    {
+        for (int i = 0; i < sInputName.size(); i++)
+        {
+            if (std::isspace(sInputName[i]))
+            {
+                system("CLS");
+                std::cout << "\nVa rugam sa nu folositi spatii in numele utilizatorului.\n\n";
+                return false;
+            }
+        }
+    }
+    else 
+    { 
+        system("CLS");
+        std::cout << "\nVa rugam sa va asigurati ca introduceti un nume alcatuit din minim 6, maxim 16, caractere.\n\n";
+        return false;
+    }
+
+    return true;
+}
+
+bool UserAccount::bIsUserPasswordValid(std::string sInputPassword)
+{
+    int uppercaseCount = 0;
+    int alphaNumCount = 0; 
+    int specialCharCount = 0;
+
+    if (sInputPassword.size() >= 6 && sInputPassword.size() <= 16)
+    {
+        for (int i = 0; i < sInputPassword.size(); i++)
+        {
+            if (std::isalnum(sInputPassword[i]) && !(std::isupper(sInputPassword[i])))
+                alphaNumCount++;
+            else if (std::ispunct(sInputPassword[i]))
+                specialCharCount++;
+            else if (std::isupper(sInputPassword[i]))
+                uppercaseCount++;
+            else if (std::isspace(sInputPassword[i]))
+            {
+                system("CLS");
+                std::cout << "\nVa rugam sa nu folositi spatii in numele utilizatorului.\n\n";
+                return false;
+            }
+        }
+    }
+    else
+    {
+        std::cout << "\nVa rugam sa va asigurati ca introduceti o parola alcatuita din minim 6, maxim 16, caractere.\n\n";
+        return false;
+    }
+
+    if (alphaNumCount < 4 || specialCharCount < 1 || uppercaseCount < 1)
+    {
+        std::cout << "\nVa rugam sa va asigurati ca parola introdusa este alcatuita din cel putin: o majuscula, un caracter special si patru caractere mici.\n\n";
+        return false;
+    }
+    return true;
+}
+
+bool UserAccount::bDoesAccountHaveAccess(UserAccount* adminAccount)
+{
+    if (!(bIsUserNameValid(this->sGetUserName())) || !(bIsUserPasswordValid(this->sGetUserPassword())))
+    {
+        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
+        system("pause > nul");
+        system("CLS");
+        return false;
+    }
+    else if (adminAccount->sGetUserName() != this->sGetUserName())
+    {
+        std::cout << "\nNumele/parola contului este incorect(a).";
+        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
+        system("pause > nul");
+        system("CLS");
+        return false;
+    }
+    else if (adminAccount->sGetUserPassword() != this->sGetUserPassword())
+    {
+        std::cout << "\nNumele/parola contului este incorect(a).";
+        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
+        system("pause > nul");
+        system("CLS");
+        return false;
+    }
+    else
+        return true;
 }
