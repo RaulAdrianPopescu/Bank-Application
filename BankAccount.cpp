@@ -9,6 +9,15 @@ BankAccount::BankAccount(std::string sAccountName, std::string sAccountSurname, 
 	sIban = sAccountIban;
 }
 
+BankAccount::BankAccount(std::string sAccountName, std::string sAccountSurname, CURRENCY eAccountCurrency, std::string sAccountIban, double fAccountBalance)
+{
+	sName = sAccountName;
+	sSurname = sAccountSurname;
+	eCurrency = eAccountCurrency;
+	sIban = sAccountIban;
+	fBalance = fAccountBalance;
+}
+
 ////// DESTRUCTOR
 
 BankAccount::~BankAccount() {}

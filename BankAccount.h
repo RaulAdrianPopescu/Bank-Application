@@ -16,6 +16,7 @@ public:
 
 	////// CONSTRUCTOR(S)
 	BankAccount(std::string sAccountName, std::string sAccountSurname, std::string sAccountIban);
+	BankAccount(std::string sAccountName, std::string sAccountSurname, CURRENCY eAccountCurrency, std::string sAccountIban, double fAccountBalance);
 
 	////// DESTRUCTOR
 	~BankAccount();

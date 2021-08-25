@@ -1,11 +1,11 @@
 #pragma once
 
 #include "BankAccount.h"
+#include "FileManager.h"
 
 #include <vector>
 #include <cstdio>
 #include <cstdlib>
-#include <fstream>
 
 class Bank
 {
@@ -20,12 +20,12 @@ public:
 	////// GETTERS(S)
 	std::vector<BankAccount*> vGetBankAccounts() { return vBankAccounts; }
 
-	////// PUBLIC METHOD(S)
+	////// METHOD(S)
 	void mainMenu();
 
 private:
 
-	////// PRIVATE METHOD(S)
+	////// METHOD(S)
 	CURRENCY eSelectCurrency();
 	void vAddAccount();
 	void vSeeAccounts() const;
@@ -33,6 +33,7 @@ private:
 	std::string sCreateIban();
 
 	////// FIELD(S)
+	FileManagerBankAccounts* bankAccountDatabase;
 	std::vector<BankAccount*> vBankAccounts;
 };
 
@@ -63,4 +64,5 @@ private:
 	void sSetUserPassword(std::string& sInputPassword);
 	std::string sUserName;
 	std::string sUserPassword;
+	FileManagerUserAccounts* userAccountsDatabase = new FileManagerUserAccounts("user_accounts.csv");
 };

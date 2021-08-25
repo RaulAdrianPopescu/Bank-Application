@@ -6,10 +6,22 @@
 ////// CONSTRUCTOR(S)
 Bank::Bank() 
 {
+    bankAccountDatabase = new FileManagerBankAccounts("bank_accounts.csv");
 }
 
 ////// DESTRUCTOR
-Bank::~Bank() { vBankAccounts.clear(); }
+Bank::~Bank() 
+{ 
+    for (auto iter = vBankAccounts.begin(); iter != vBankAccounts.end(); iter++)
+    {
+        BankAccount* toRemove = *iter;
+        vBankAccounts.erase(iter);
+        delete toRemove;
+    }
+
+    vBankAccounts.clear();
+    delete bankAccountDatabase;
+}
 
 ////// METHOD(S)
 
@@ -178,8 +190,8 @@ void Bank::vModifyAccount()
     system("CLS");
     std::cout << "Introduceti prenumele si numele contului pe care doriti sa il modificati: ";
     std::string sName, sSurname;
-    std::cin >> sSurname; std::cin.ignore();
-    std::cin >> sName;
+    std::cin >> sName; std::cin.ignore();
+    std::cin >> sSurname;
 
     BankAccount* temp = nullptr;
     std::vector<BankAccount*>::iterator iter = vBankAccounts.begin();
@@ -225,10 +237,10 @@ void Bank::vModifyAccount()
     {
         system("CLS");
         std::cout << "Ce operatie doresti sa efectuezi asupra contului?\n\n";
-        std::cout << "1 -> Modifica nume\n";
-        std::cout << "2 -> Modifica prenume\n";
+        std::cout << "1 -> Modifica prenume\n";
+        std::cout << "2 -> Modifica nume\n";
         std::cout << "3 -> Modifica suma din cont\n";
-        std::cout << "0 -> Intoarcete in meniul principal\n";
+        std::cout << "\n0 -> Intoarcete in meniul principal\n";
         std::cout << "\nIntroduceti optiunea: ";
         int iOption;
         std::cin >> iOption;
@@ -238,7 +250,7 @@ void Bank::vModifyAccount()
         {
         case 1:
         {
-            std::cout << "Introduceti noul nume al contului: ";
+            std::cout << "Introduceti noul prenume al contului: ";
             std::string sNewAccName;
             std::cin >> sNewAccName;
             temp->sSetName(sNewAccName);
@@ -249,7 +261,7 @@ void Bank::vModifyAccount()
             break;
         case 2:
         {
-            std::cout << "Introduceti noul prenume al contului: ";
+            std::cout << "Introduceti noul nume al contului: ";
             std::string sNewAccSurname;
             std::cin >> sNewAccSurname;
             temp->sSetSurname(sNewAccSurname);
@@ -279,7 +291,7 @@ UserAccount::UserAccount()
         std::cout << "Introduceti numele utilizatorul: ";
         std::getline(std::cin, sNameInput);
         if (!bIsUserNameValid(sNameInput))
-            continue;
+            continue; 
 
         std::cout << "Introduceti parola utilizatorul: ";
         std::getline(std::cin, sPasswordInput);
