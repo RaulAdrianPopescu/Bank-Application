@@ -114,8 +114,8 @@ void FileManagerBankAccounts::RemoveFromFile(BankAccount* currentAccount)
 		if ((*iter)->sGetIban() == currentAccount->sGetIban())
 		{
 			BankAccount* toRemove = *iter;
-			dataFromFile.erase(iter);
 			delete toRemove;
+			dataFromFile.erase(iter);
 			break;
 		}
 

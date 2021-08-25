@@ -26,7 +26,11 @@ class FileManagerUserAccounts : public FileManager
 public:
 
 	////// CONSTRUCTOR(S)
-	FileManagerUserAccounts(std::string fileName) : FileManager(fileName) {}
+	FileManagerUserAccounts(std::string fileName) : FileManager(fileName) 
+	{ 
+		inputFile.open(fileName); 
+		this->fileName = fileName; 
+	}
 
 	////// METHOD(S)
 	void AddToFile(UserAccount* newUser);
@@ -45,7 +49,11 @@ class FileManagerBankAccounts : public FileManager
 public:
 
 	////// CONSTRUCTOR(S)
-	FileManagerBankAccounts(std::string fileName) : FileManager(fileName) {}
+	FileManagerBankAccounts(std::string fileName) : FileManager(fileName)
+	{
+		inputFile.open(fileName);
+		this->fileName = fileName;
+	}
 
 	////// METHOD(S)
 	void AddToFile(BankAccount* newBankAccount);

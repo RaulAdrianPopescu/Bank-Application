@@ -15,7 +15,6 @@ Bank::~Bank()
     for (auto iter = vBankAccounts.begin(); iter != vBankAccounts.end(); iter++)
     {
         BankAccount* toRemove = *iter;
-        vBankAccounts.erase(iter);
         delete toRemove;
     }
 
