@@ -26,7 +26,7 @@ void FileManagerUserAccounts::AddToFile(UserAccount* newUser)
     std::map <std::string, std::string> dataFromFile = ReadDataFromFile();
 
     if (dataFromFile.find(newUser->sGetUserName()) != dataFromFile.end())
-        std::cout << "Utilizatorul deja exista. Va rugam incercati un alt nume de utilizator.\n";
+        std::cout << "\n\nUtilizatorul deja exista. Va rugam incercati un alt nume de utilizator.\n";
     else
     {
         std::pair <std::string, std::string> newUserPair = { newUser->sGetUserName(), newUser->sGetUserPassword() };

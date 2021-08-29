@@ -1,6 +1,5 @@
 #include "UserAccount.h"
 
-
 ////// CONSTRUCTOR(S)
 UserAccount::UserAccount()
 {
