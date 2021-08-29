@@ -261,8 +261,9 @@ void Bank::ModifyAccount()
     do
     {
         system("CLS");
-        std::cout << "Introduceti prenumele si numele contului pe care doriti sa il modificati: ";
-        std::cin >> sName; std::cin.ignore(); std::cin >> sSurname;
+        std::cout << "Introduceti prenumele: "; std::cin >> sName;
+        std::cout << "Introduceti numele:    "; std::cin >> sSurname;
+
     } while (!(bank_utilities::IsValidNameOrSurname(sName) && bank_utilities::IsValidNameOrSurname(sSurname)));
         
     BankAccount* tempBankAccount = nullptr;
