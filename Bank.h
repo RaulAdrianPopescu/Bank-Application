@@ -1,11 +1,6 @@
 #pragma once
 
-#include "BankAccount.h"
 #include "FileManager.h"
-
-#include <vector>
-#include <cstdio>
-#include <cstdlib>
 
 class Bank
 {
@@ -17,52 +12,25 @@ public:
 	////// DESTRUCTOR
 	~Bank();
 
-	////// GETTERS(S)
-	std::vector<BankAccount*> vGetBankAccounts() { return vBankAccounts; }
-
 	////// METHOD(S)
 	void mainMenu();
+	static Bank* getInstanceOfBank();
 
 private:
 
 	////// METHOD(S)
 	CURRENCY eSelectCurrency();
-	void vAddAccount();
-	void vSeeAccounts() const;
-	void vModifyAccount();
+	void AddAccount();
+	void SeeAccounts();
+	void ModifyAccount();
+	void AddUserAccount();
+	void DeleteUserAccount();
 	std::string sCreateIban();
 
 	////// FIELD(S)
 	FileManagerBankAccounts* bankAccountDatabase;
-	std::vector<BankAccount*> vBankAccounts;
-};
+	FileManagerUserAccounts* userAccountDatabase;
+	UserAccount* currentLogin = nullptr;
 
-class UserAccount
-{
-public:
-
-	////// CONSTRUCTOR(S)
-	UserAccount();
-	UserAccount(std::string sName, std::string sPassword);
-
-	////// DESTRUCTOR
-	~UserAccount();
-	
-	////// GETTER(S)
-	std::string const sGetUserName();
-	std::string const sGetUserPassword();
-
-	////// METHOD(S)
-	bool bIsUserNameValid(std::string sInputName);
-	bool bIsUserPasswordValid(std::string sInputPassword);
-	bool bDoesAccountHaveAccess(UserAccount* adminAccount);
-
-private:
-
-	////// FIELD(S)
-	void sSetUserName(std::string& sInputName);
-	void sSetUserPassword(std::string& sInputPassword);
-	std::string sUserName;
-	std::string sUserPassword;
-	FileManagerUserAccounts* userAccountsDatabase = new FileManagerUserAccounts("user_accounts.csv");
+	static Bank* instanceOfBank;
 };

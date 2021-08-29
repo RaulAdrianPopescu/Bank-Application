@@ -1,25 +1,63 @@
 #include "Bank.h"
-#include <ctime>
 
 /////////////////  BANK \\\\\\\\\\\\\\\\\\
 
 ////// CONSTRUCTOR(S)
 Bank::Bank() 
 {
-    bankAccountDatabase = new FileManagerBankAccounts("bank_accounts.csv");
+   bankAccountDatabase = new FileManagerBankAccounts("bank_accounts.csv");
+   userAccountDatabase = new FileManagerUserAccounts("user_accounts.csv");
+
+   if (!userAccountDatabase->HasUserAccounts())
+   {
+       std::cout << "Nu exista utilizatori in baza de data. Va rugam sa creati un cont.\n";
+       
+       std::cout << "\n\nAPASATI ORICE TASTA PENTRU A CONTINUA...";
+       system("pause > nul");
+
+       currentLogin = new UserAccount();
+       userAccountDatabase->AddToFile(currentLogin);
+
+       delete currentLogin;
+   }
+   else
+   {
+       int iLoginAttempts = 4;
+
+       while (iLoginAttempts > 0)
+       {
+           system("cls");
+
+           if (iLoginAttempts != 4)
+               std::cout << "Informatiile introduse nu sunt corecte, te rugam sa reincerci. Incercari ramase: " << iLoginAttempts << "\n\n";
+
+           if (currentLogin != nullptr)
+               delete currentLogin;
+
+           std::string sUserName, sUserPassword;
+           std::cout << "Introduceti numele de utilizator: "; std::cin >> sUserName;
+           std::cout << "Introduceti parola: "; std::cin >> sUserPassword;
+
+           currentLogin = new UserAccount(sUserName, sUserPassword);
+           if (!(currentLogin->bIsUserNameValid(currentLogin->sGetUserName())) || !(currentLogin->bIsUserPasswordValid(currentLogin->sGetUserPassword())))
+               iLoginAttempts--;
+           else if (!(userAccountDatabase->IsAccessAllowed(currentLogin)))
+               iLoginAttempts--;
+           else
+               break;
+       }
+
+       if (iLoginAttempts == 0)
+           std::exit(2);
+   }
 }
 
 ////// DESTRUCTOR
 Bank::~Bank() 
-{ 
-    for (auto iter = vBankAccounts.begin(); iter != vBankAccounts.end(); iter++)
-    {
-        BankAccount* toRemove = *iter;
-        delete toRemove;
-    }
-
-    vBankAccounts.clear();
+{
+    delete userAccountDatabase;
     delete bankAccountDatabase;
+    delete currentLogin;
 }
 
 ////// METHOD(S)
@@ -46,15 +84,18 @@ CURRENCY Bank::eSelectCurrency()
     }
 }
 
-void Bank::vAddAccount()
+void Bank::AddAccount()
 {
-	std::cout << "Introduceti prenumele utilizatorului: ";
-	std::string sSurname;
-	std::cin >> sSurname;
+    std::string sName, sSurname;
+    do
+    {
+        system("cls");
+        std::cout << "Introduceti prenumele utilizatorului (prenumele poate contine spatiu sau cratima): ";
+        std::cin >> sName;
 
-	std::cout << "Introduceti numele utlizatorului: ";
-	std::string sName;
-	std::cin >> sName;
+        std::cout << "Introduceti numele utlizatorului(numele poate contine spatiu sau cratima): ";
+        std::cin >> sSurname;
+    } while (!(bank_utilities::IsValidNameOrSurname(sName) && bank_utilities::IsValidNameOrSurname(sSurname)));
 
     std::string sIban{sCreateIban()};
     if (sIban == "IBAN invalid.\n")
@@ -64,18 +105,21 @@ void Bank::vAddAccount()
     }
 
 	BankAccount* account = new BankAccount(sName, sSurname, sIban);
-	vBankAccounts.push_back(account);
+    account->SetCurrencyFromIban();
+	bankAccountDatabase->AddToFile(account);
+    delete account;
 
     std::cout << "\n1 -> Pentru a mai adauga un cont\n";
     std::cout << "2 -> Pentru a reveni in meniul principal\n";
     int iOption = 0;
-    std::cin >> iOption;
+    std::cout << "\nSelectie: "; std::cin >> iOption;
+
     
     switch (iOption)
     {
     case 1:
         system("CLS");
-        vAddAccount();
+        AddAccount();
         break;
     default:
         break;
@@ -92,7 +136,7 @@ std::string Bank::sCreateIban()
     {
         (i == 5) ? srand(time(NULL)) : srand(std::stoi(sIban[i + 1]));
 
-        sIban[i] = std::to_string(rand() % 9999 + 1000);
+        sIban[i] = std::to_string(rand() % 8999 + 1000);
     }
 
     switch (eUserCurrency)
@@ -125,21 +169,33 @@ std::string Bank::sCreateIban()
     return sGeneratedIban;
 }
 
-void Bank::vSeeAccounts() const
+void Bank::SeeAccounts()
 {
-	std::cout << "Numarul de conturi din baza de date a bancii este: " << vBankAccounts.size();
+	std::cout << "Numarul de conturi din baza de date a bancii este: " << bankAccountDatabase->CountEntries();
+    std::vector<std::pair<int, BankAccount*>> entries = bankAccountDatabase->ReturnAllEntriesWithIds();
 	std::cout << "\n\n";
 
-    if (!vBankAccounts.empty())
+    if (!entries.empty())
     {
-        for (int i = 0; i < vBankAccounts.size(); i++)
+        std::cout.width(8); std::cout << std::left << "ID";
+        std::cout.width(15); std::cout << std::left << "Prenume";
+        std::cout.width(15); std::cout << std::left << "Nume";
+        std::cout.width(24); std::cout << std::left << "Moneda";
+        std::cout.width(28); std::cout << std::left << "IBAN";
+        std::cout.width(15); std::cout << std::left << "Sold";
+        std::cout << "\n\n";
+
+        for (auto iter = entries.begin(); iter < entries.end(); iter++)
         {
-            std::cout << "Contul " << i + 1 << ": " << vBankAccounts[i]->sGetSurname()
-                      << ' ' << vBankAccounts[i]->sGetName()
-                      << " ~~~~~~~~~ " << vBankAccounts[i]->sGetIban() << '\n';
+            std::cout.width(8); std::cout << std::left << iter->first;
+            std::cout.width(15); std::cout << std::left << iter->second->sGetName();
+            std::cout.width(15); std::cout << std::left << iter->second->sGetSurname();
+            std::cout.width(24); std::cout << std::left << iter->second->sGetCurrencyAsString();
+            std::cout.width(28); std::cout << std::left << iter->second->sGetIban();
+            std::cout.width(15); std::cout << std::left << iter->second->fGetBalance();
+            std::cout << "\n";
         }
     }
-    else { std::cout << "NU A FOST INREGISTRAT NICIUN CONT IN BAZA DE DATE!\n"; }
 
     std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIU...";
     system("pause > nul");
@@ -152,12 +208,13 @@ void Bank::mainMenu()
     while (iOption)
     {
         system("CLS");
-        std::cout << "Meniul Principal\n";
-
+        std::cout << "Meniul Principal\n\n";
         std::cout << "1 -> Adaugare cont\n";
         std::cout << "2 -> Vizualizare conturi\n";
         std::cout << "3 -> Modificare conturi\n";
-        std::cout << "0 -> Inchidere aplicatie.\n";
+        std::cout << "4 -> Adaugare utilizator\n";
+        std::cout << "5 -> Stergeti utilizator\n\n";
+        std::cout << "0 -> Inchidere aplicatie.\n\n";
         std::cout << "Introduceti optiunea: ";
         std::cin >> iOption;
         system("CLS");
@@ -166,13 +223,19 @@ void Bank::mainMenu()
         switch (iOption)
         {
         case 1:
-            vAddAccount();
+            AddAccount();
             break;
         case 2:
-            vSeeAccounts();
+            SeeAccounts();
             break;
         case 3:
-            vModifyAccount();
+            ModifyAccount();
+            break;
+        case 4:
+            AddUserAccount();
+            break;
+        case 5:
+            DeleteUserAccount();
             break;
         case 0:
             std::cout << "La revedere...\n";
@@ -184,29 +247,28 @@ void Bank::mainMenu()
     }
 }
 
-void Bank::vModifyAccount()
+Bank* Bank::getInstanceOfBank()
 {
-    system("CLS");
-    std::cout << "Introduceti prenumele si numele contului pe care doriti sa il modificati: ";
+    if (instanceOfBank == nullptr)
+        instanceOfBank = new Bank();
+
+    return instanceOfBank;
+}
+
+void Bank::ModifyAccount()
+{
     std::string sName, sSurname;
-    std::cin >> sName; std::cin.ignore();
-    std::cin >> sSurname;
-
-    BankAccount* temp = nullptr;
-    std::vector<BankAccount*>::iterator iter = vBankAccounts.begin();
-
-    while (iter != vBankAccounts.end())
+    do
     {
-        if ((*iter)->sGetName() == sName && (*iter)->sGetSurname() == sSurname)
-        {
-            temp = *iter;
-            break;
-        }
+        system("CLS");
+        std::cout << "Introduceti prenumele si numele contului pe care doriti sa il modificati: ";
+        std::cin >> sName; std::cin.ignore(); std::cin >> sSurname;
+    } while (!(bank_utilities::IsValidNameOrSurname(sName) && bank_utilities::IsValidNameOrSurname(sSurname)));
+        
+    BankAccount* tempBankAccount = nullptr;
+    std::vector<std::pair<int,BankAccount*>> databaseEntries (bankAccountDatabase->FindEntriesInFile(sName + " " + sSurname));
 
-        iter++;
-    }
-
-    if (temp == nullptr)
+    if (databaseEntries.size() == 0)
     {
         std::cout << "\nContul nu a fost gasit\n\n";
         std::cout << "1 -> Creati un cont\n";
@@ -219,55 +281,150 @@ void Bank::vModifyAccount()
         {
         case 1:
             system("CLS");
-            vAddAccount();
+            AddAccount();
             break;
         case 2:
-            vModifyAccount();
+            ModifyAccount();
             break;
         case 0:
-            mainMenu();
             break;
         default:
             break;
         }
     }
-
     else
     {
+        int iSelectedEntryId;
+        if (databaseEntries.size() > 1)
+        {
+            system("CLS");
+            std::cout << "Au fost gasite mai multe conturi sub acelasi nume.\n"
+                      << "Introduceti numarul de identificare a contului pe care doriti sa il modificati.\n\nConturi: \n\n";
+
+            std::cout.width(8); std::cout << std::left << "ID";
+            std::cout.width(15); std::cout << std::left << "Prenume";
+            std::cout.width(15); std::cout << std::left << "Nume";
+            std::cout.width(24); std::cout << std::left << "Moneda";
+            std::cout.width(28); std::cout << std::left << "IBAN";
+            std::cout.width(15); std::cout << std::left << "Sold";
+            std::cout << "\n\n";
+
+            for (auto iter = databaseEntries.begin(); iter < databaseEntries.end(); iter++)
+            {
+                std::cout.width(8); std::cout << std::left << iter->first;
+                std::cout.width(15); std::cout << std::left << iter->second->sGetName();
+                std::cout.width(15); std::cout << std::left << iter->second->sGetSurname();
+                std::cout.width(24); std::cout << std::left << iter->second->sGetCurrencyAsString();
+                std::cout.width(28); std::cout << std::left << iter->second->sGetIban();
+                std::cout.width(15); std::cout << std::left << iter->second->fGetBalance();
+                std::cout << "\n";
+            }
+
+            std::cout << "\nSelectie: ";
+            std::cin >> iSelectedEntryId;
+
+            for (auto iter = databaseEntries.begin(); iter != databaseEntries.end(); iter++)
+                if (iter->first == iSelectedEntryId)
+                {
+                    tempBankAccount = iter->second;
+                    break;
+                }
+        }
+        else
+        {
+            iSelectedEntryId = databaseEntries.begin()->first;
+            tempBankAccount = databaseEntries.begin()->second;
+        }
+
         system("CLS");
         std::cout << "Ce operatie doresti sa efectuezi asupra contului?\n\n";
         std::cout << "1 -> Modifica prenume\n";
         std::cout << "2 -> Modifica nume\n";
         std::cout << "3 -> Modifica suma din cont\n";
+        std::cout << "9 -> STERGETI CONTUL\n";
         std::cout << "\n0 -> Intoarcete in meniul principal\n";
         std::cout << "\nIntroduceti optiunea: ";
         int iOption;
         std::cin >> iOption;
-        system("CLS");
 
         switch (iOption)
         {
         case 1:
-        {
-            std::cout << "Introduceti noul prenume al contului: ";
-            std::string sNewAccName;
-            std::cin >> sNewAccName;
-            temp->sSetName(sNewAccName);
-            std::cout << "\nNumele a fost modificat cu succes!";
-            std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIU...";
-            system("pause > nul");
-        }
+            {
+                std::string sNewAccName;
+
+                do
+                {
+                    system("CLS");
+                    std::cout << "Prenumele actual:                     " << tempBankAccount->sGetName() << '\n';
+                    std::cout << "Introduceti noul prenume al contului: ";
+                    std::cin >> sNewAccName;
+                } while (!bank_utilities::IsValidNameOrSurname(sName));
+                tempBankAccount->sSetName(sNewAccName);
+                bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
+                std::cout << "\nNumele a fost modificat cu succes!";
+                std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
+                system("pause > nul");
+            }
             break;
         case 2:
-        {
-            std::cout << "Introduceti noul nume al contului: ";
-            std::string sNewAccSurname;
-            std::cin >> sNewAccSurname;
-            temp->sSetSurname(sNewAccSurname);
-            std::cout << "\nPrenumele a fost modificat cu succes!";
-            std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIU...";
-            system("pause > nul");
-        }
+            {
+                std::string sNewAccSurname;
+
+                do
+                {
+                    system("CLS");
+                    std::cout << "Numele actual:                     " << tempBankAccount->sGetSurname() << '\n';
+                    std::cout << "Introduceti noul nume al contului: ";
+                    std::cin >> sNewAccSurname;
+                } while (!bank_utilities::IsValidNameOrSurname(sName));
+                tempBankAccount->sSetSurname(sNewAccSurname);
+                bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
+                std::cout << "\nPrenumele a fost modificat cu succes!";
+                std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
+                system("pause > nul");
+            }
+            break;
+        case 3:
+            {
+                std::string sNewAccBalance;
+                do
+                {
+                    system("CLS");
+                    std::cout << "Soldul actual:         " << tempBankAccount->fGetBalance() << '\n';
+                    std::cout << "Introduceti noul sold: ";
+                    std::cin >> sNewAccBalance;
+                } while (!bank_utilities::IsValidBalance(sNewAccBalance));
+                tempBankAccount->fSetBalance(std::stod(sNewAccBalance));
+                bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
+                std::cout << "\nSoldul a fost modificat cu succes!";
+                std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
+                system("pause > nul");
+            }
+            break;
+        case 9:
+            {
+                system("CLS");
+                std::string sUserName, sUserPassword;
+                std::cout << "Pentru aceasta operatiune, va rugam sa introduceti din nou numele de utilizator si parola.\n\n";
+                std::cout << "Username: "; std::cin >> sUserName;
+                std::cout << "Password: "; std::cin >> sUserPassword;
+                UserAccount* userToValidate = new UserAccount(sUserName, sUserPassword);
+                if (currentLogin->sGetUserName() == userToValidate->sGetUserName() && currentLogin->sGetUserPassword() == userToValidate->sGetUserPassword())
+                {
+                    delete userToValidate;
+                    bankAccountDatabase->RemoveFromFile(tempBankAccount);
+                    std::cout << "Contul a fost sters!\n";
+                }
+                else
+                {
+                    delete userToValidate;
+                    std::cout << "ACTIUNEA A ESUAT!\n";
+                    std::exit(1); // 1 - ACTION DENIED, EMERGENCY SHUTDOWN
+                }
+                std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
+                system("pause > nul");
+            }
             break;
         default:
             break;
@@ -275,141 +432,53 @@ void Bank::vModifyAccount()
     }
 }
 
-
-
-/////////////////  USER ACCOUNT \\\\\\\\\\\\\\\\\\
-
-////// CONSTRUCTOR(S)
-UserAccount::UserAccount()
+void Bank::AddUserAccount()
 {
     system("cls");
-    std::string sNameInput, sPasswordInput;
+    std::string sUserName, sUserPassword;
+    UserAccount* newUserAccount = nullptr;
 
-    while (true)
+    while (newUserAccount == nullptr)
     {
-        std::cout << "Introduceti numele utilizatorul: ";
-        std::getline(std::cin, sNameInput);
-        if (!bIsUserNameValid(sNameInput))
-            continue; 
+        std::cout << "Alegeti un nume de utilizator: "; std::cin >> sUserName;
+        std::cout << "Alegeti o parola:              "; std::cin >> sUserPassword;
 
-        std::cout << "Introduceti parola utilizatorul: ";
-        std::getline(std::cin, sPasswordInput);
-        if (!bIsUserPasswordValid(sPasswordInput))
-            continue;
-        
-        break;
+        if (newUserAccount->bIsUserNameValid(sUserName) && newUserAccount->bIsUserPasswordValid(sUserPassword))
+            newUserAccount = new UserAccount(sUserName, sUserPassword);
     }
 
-    sSetUserName(sNameInput);
-    sSetUserPassword(sPasswordInput);
+    userAccountDatabase->AddToFile(newUserAccount);
 
+    std::cout << "\n\n1 -> Adaugati un nou cont\n";
+    std::cout << "2 -> Mergeti inapoi in meniul principal\n\n";
+    std::cout << "Selectie: ";
+    int iOption; std::cin >> iOption;
+
+    if (iOption == 1)
+        AddUserAccount();
+}
+
+void Bank::DeleteUserAccount()
+{
     system("cls");
-}
+    std::string sUserName;
+    int countUsersRegistered = userAccountDatabase->CountUsersRegistered();
 
-UserAccount::UserAccount(std::string sName, std::string sPassword)
-{
-        sSetUserName(sName);
-        sSetUserPassword(sPassword);
-}
+    std::cout << "Alegeti utilizatorul pe care doriti sa il stergeti: "; std::cin >> sUserName;
 
-////// DESTRUCTOR
-UserAccount::~UserAccount() {}
-
-////// GETTER(S)
-std::string const UserAccount::sGetUserName(){ return sUserName; }
-std::string const UserAccount::sGetUserPassword(){ return sUserPassword; }
-
-////// SETTER(S)
-void UserAccount::sSetUserName(std::string& sInputName) { sUserName = sInputName; }
-void UserAccount::sSetUserPassword(std::string& sInputPassword) { sUserPassword = sInputPassword; }
-
-bool UserAccount::bIsUserNameValid(std::string sInputName)
-{
-    if (sInputName.size() >= 6 && sInputName.size() <= 16)
-    {
-        for (int i = 0; i < sInputName.size(); i++)
-        {
-            if (std::isspace(sInputName[i]))
-            {
-                system("CLS");
-                std::cout << "\nVa rugam sa nu folositi spatii in numele utilizatorului.\n\n";
-                return false;
-            }
-        }
-    }
-    else 
-    { 
-        system("CLS");
-        std::cout << "\nVa rugam sa va asigurati ca introduceti un nume alcatuit din minim 6, maxim 16, caractere.\n\n";
-        return false;
-    }
-
-    return true;
-}
-
-bool UserAccount::bIsUserPasswordValid(std::string sInputPassword)
-{
-    int uppercaseCount = 0;
-    int alphaNumCount = 0; 
-    int specialCharCount = 0;
-
-    if (sInputPassword.size() >= 6 && sInputPassword.size() <= 16)
-    {
-        for (int i = 0; i < sInputPassword.size(); i++)
-        {
-            if (std::isalnum(sInputPassword[i]) && !(std::isupper(sInputPassword[i])))
-                alphaNumCount++;
-            else if (std::ispunct(sInputPassword[i]))
-                specialCharCount++;
-            else if (std::isupper(sInputPassword[i]))
-                uppercaseCount++;
-            else if (std::isspace(sInputPassword[i]))
-            {
-                system("CLS");
-                std::cout << "\nVa rugam sa nu folositi spatii in numele utilizatorului.\n\n";
-                return false;
-            }
-        }
-    }
+    if (sUserName == currentLogin->sGetUserName())
+        std::cout << "Nu puteti sterge utilizatorul actual\n";
     else
-    {
-        std::cout << "\nVa rugam sa va asigurati ca introduceti o parola alcatuita din minim 6, maxim 16, caractere.\n\n";
-        return false;
-    }
+        userAccountDatabase->RemoveFromFile(sUserName);
 
-    if (alphaNumCount < 4 || specialCharCount < 1 || uppercaseCount < 1)
-    {
-        std::cout << "\nVa rugam sa va asigurati ca parola introdusa este alcatuita din cel putin: o majuscula, un caracter special si patru caractere mici.\n\n";
-        return false;
-    }
-    return true;
-}
+    if ((userAccountDatabase->CountUsersRegistered() == countUsersRegistered) && !(sUserName == currentLogin->sGetUserName()))
+        std::cout << "Contul nu a fost gasit.\n";
 
-bool UserAccount::bDoesAccountHaveAccess(UserAccount* adminAccount)
-{
-    if (!(bIsUserNameValid(this->sGetUserName())) || !(bIsUserPasswordValid(this->sGetUserPassword())))
-    {
-        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
-        system("pause > nul");
-        system("CLS");
-        return false;
-    }
-    else if (adminAccount->sGetUserName() != this->sGetUserName())
-    {
-        std::cout << "\nNumele/parola contului este incorect(a).";
-        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
-        system("pause > nul");
-        system("CLS");
-        return false;
-    }
-    else if (adminAccount->sGetUserPassword() != this->sGetUserPassword())
-    {
-        std::cout << "\nNumele/parola contului este incorect(a).";
-        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
-        system("pause > nul");
-        system("CLS");
-        return false;
-    }
-    else
-        return true;
+    std::cout << "\n\n1 -> Stergeti alt cont\n";
+    std::cout << "2 -> Mergeti inapoi in meniul principal\n\n";
+    std::cout << "Selectie: ";
+    int iOption; std::cin >> iOption;
+
+    if (iOption == 1)
+        DeleteUserAccount();
 }

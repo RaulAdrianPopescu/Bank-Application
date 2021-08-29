@@ -1,64 +1,62 @@
 #pragma once
 
-#include "Bank.h"
-
-#include <map>
-#include <fstream>
-#include <utility>
-
+#include "UserAccount.h"
+#include "BankAccount.h"
 
 class FileManager
 {
-public:
+protected:
 	////// CONSTRUCTOR(S)
 	FileManager(std::string fileName);
 
 	////// DESTRUCTOR
-	~FileManager();
+	virtual ~FileManager();
 
 	////// FIELD(S)
 	std::ifstream inputFile;
 	std::string fileName;
 };
 
-class FileManagerUserAccounts : public FileManager
+class FileManagerUserAccounts : protected FileManager
 {
 public:
 
 	////// CONSTRUCTOR(S)
-	FileManagerUserAccounts(std::string fileName) : FileManager(fileName) 
-	{ 
-		inputFile.open(fileName); 
-		this->fileName = fileName; 
-	}
+	FileManagerUserAccounts(std::string fileName) : FileManager(fileName) {}
+
+	////// DESTRUCTOR
+	~FileManagerUserAccounts();
 
 	////// METHOD(S)
 	void AddToFile(UserAccount* newUser);
 	void RemoveFromFile(std::string sEntrySearch);
+	bool IsAccessAllowed(UserAccount* login);
+	bool HasUserAccounts();
+	int CountUsersRegistered();
 
 private:
 
 	////// METHOD(S)
 	std::map<std::string, std::string> ReadDataFromFile();
 	void MergeNewDataWithFile(std::map<std::string, std::string> userDatabase);
-	bool IsInFile(std::string sUserName);
 };
 
-class FileManagerBankAccounts : public FileManager
+class FileManagerBankAccounts : protected FileManager
 {
 public:
 
 	////// CONSTRUCTOR(S)
-	FileManagerBankAccounts(std::string fileName) : FileManager(fileName)
-	{
-		inputFile.open(fileName);
-		this->fileName = fileName;
-	}
+	FileManagerBankAccounts(std::string fileName) : FileManager(fileName) {}
+
+	////// DESTRUCTOR
+	~FileManagerBankAccounts();
 
 	////// METHOD(S)
 	void AddToFile(BankAccount* newBankAccount);
 	void RemoveFromFile(BankAccount* currentAccount);
 	std::vector<std::pair<int, BankAccount*>> FindEntriesInFile(std::string sSearchTerm);
+	std::vector<std::pair<int, BankAccount*>> ReturnAllEntriesWithIds();
+	void UpdateEntry(int entryId, BankAccount* updatedEntry);
 	int CountEntries();
 
 private:

@@ -1,6 +1,6 @@
 #pragma once
-#include <iostream>
-#include <string>
+
+#include "STL.h"
 
 enum class CURRENCY
 {
@@ -27,6 +27,7 @@ public:
 	CURRENCY eGetCurrency() const;
 	std::string sGetIban() const;
 	double fGetBalance() const;
+	std::string sGetCurrencyAsString();
 
 	////// SETTER(S)
 	void sSetName(std::string sAccountName);
@@ -34,6 +35,7 @@ public:
 	void eSetCurrency(CURRENCY eAccountCurrency);
 	void sSetIban(std::string sAccountIban);
 	void fSetBalance(double fAccountBalance);
+	void SetCurrencyFromIban();
 
 private:
 
@@ -44,3 +46,12 @@ private:
 	std::string sIban = "Undefined";
 	double fBalance = 0;
 };
+
+////// UTILITIES
+namespace bank_utilities
+{
+	bool IsValidNameOrSurname(std::string sName);
+	bool IsValidBalance(std::string sBalance);
+	void ClearBankAccounts(std::vector<std::pair<int, BankAccount*>> entries);
+	void ClearBankAccounts(BankAccount* entry);
+}

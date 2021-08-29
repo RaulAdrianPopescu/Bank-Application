@@ -29,6 +29,20 @@ std::string BankAccount::sGetSurname() const { return sSurname; }
 CURRENCY BankAccount::eGetCurrency() const { return eCurrency; }
 std::string BankAccount::sGetIban() const { return sIban; }
 double BankAccount::fGetBalance() const { return fBalance; }
+std::string BankAccount::sGetCurrencyAsString()
+{
+	switch (eGetCurrency())
+	{
+	case CURRENCY::RON:
+		return "RON";
+	case CURRENCY::DOLLAR:
+		return "DOLLAR";
+	case CURRENCY::EURO:
+		return "EURO";
+	default:
+		return "INVALID";
+	}
+}
 
 ////// SETTER(S)
 
@@ -37,3 +51,66 @@ void BankAccount::sSetSurname(std::string sAccountSurname) { sSurname = sAccount
 void BankAccount::eSetCurrency(CURRENCY eAccountCurrency) { eCurrency = eAccountCurrency; }
 void BankAccount::sSetIban(std::string sAccountIban) { sIban = sAccountIban; }
 void BankAccount::fSetBalance(double fAccountBalance) { fBalance = fAccountBalance; }
+void BankAccount::SetCurrencyFromIban()
+{
+	std::string sCurrentAccountIban = sGetIban();
+	std::string sCurrencySubstring = sCurrentAccountIban.substr(sCurrentAccountIban.find("ITBK") + 4, 4);
+
+	for (auto iter = sCurrencySubstring.begin(); iter != sCurrencySubstring.end(); iter++)
+		if (std::isdigit(*iter))
+		{
+			eSetCurrency(CURRENCY::RON);
+			break;
+		}
+
+	if (sCurrencySubstring == "EEUR")
+		eSetCurrency(CURRENCY::EURO);
+	else if (sCurrencySubstring == "EUSD")
+		eSetCurrency(CURRENCY::DOLLAR);
+}
+
+////// UTILITIES
+bool bank_utilities::IsValidNameOrSurname(std::string sName)
+{
+	if (sName.empty() || sName.length() > 12)
+		return false;
+
+	for (int i = 0; i < sName.length(); i++)
+		if (!std::isalpha(sName.at(i)))
+			if (!std::isspace(sName.at(i)))
+				if (sName.at(i) != '-')
+					return false;
+
+
+	return true;
+}
+
+bool bank_utilities::IsValidBalance(std::string sBalance)
+{
+	if (sBalance.empty())
+		return false;
+	else if (sBalance.size() > 12)
+
+	for (int i = 0; i < sBalance.length(); i++)
+		if (!std::isdigit(sBalance.at(i)))
+			return false;
+
+	return true;
+}
+
+void bank_utilities::ClearBankAccounts(std::vector<std::pair<int, BankAccount*>> entries)
+{
+	for (auto iter = entries.begin(); iter != entries.end(); iter++)
+	{
+		BankAccount* ptr = iter->second;
+		delete ptr;
+	}
+
+	entries.clear();
+}
+
+void bank_utilities::ClearBankAccounts(BankAccount* entry)
+{
+	if (entry != nullptr)
+		delete entry;
+}
