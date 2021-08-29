@@ -363,7 +363,7 @@ void Bank::ModifyAccount()
                 } while (!bank_utilities::IsValidNameOrSurname(sName));
                 tempBankAccount->sSetName(sNewAccName);
                 bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
-                std::cout << "\nNumele a fost modificat cu succes!";
+                std::cout << "\nPrenumele a fost modificat cu succes!";
                 std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
                 system("pause > nul");
             }
@@ -381,7 +381,7 @@ void Bank::ModifyAccount()
                 } while (!bank_utilities::IsValidNameOrSurname(sName));
                 tempBankAccount->sSetSurname(sNewAccSurname);
                 bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
-                std::cout << "\nPrenumele a fost modificat cu succes!";
+                std::cout << "\nNumele a fost modificat cu succes!";
                 std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
                 system("pause > nul");
             }
