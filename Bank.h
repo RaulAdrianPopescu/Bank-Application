@@ -14,7 +14,7 @@ public:
 
 	////// METHOD(S)
 	void mainMenu();
-	static Bank* getInstanceOfBank();
+	static Bank* GetInstanceOfBank();
 
 private:
 

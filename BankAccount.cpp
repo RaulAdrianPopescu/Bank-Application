@@ -87,11 +87,12 @@ bool bank_utilities::IsValidNameOrSurname(std::string sName)
 
 bool bank_utilities::IsValidBalance(std::string sBalance)
 {
-	if (sBalance.empty() || sBalance.length() > 12)
+	if (sBalance.empty() || sBalance.length() > 14)
 		return false;
 
 	for (int i = 0; i < sBalance.length(); i++)
 		if (!std::isdigit(sBalance.at(i)))
+			if (sBalance.at(i) != '.')
 			return false;
 
 	return true;

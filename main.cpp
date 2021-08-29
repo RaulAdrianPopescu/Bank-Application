@@ -3,7 +3,7 @@
 Bank* Bank::instanceOfBank = 0;
 int main()
 {
-	Bank* myBank = myBank->getInstanceOfBank();
+	Bank* myBank = myBank->GetInstanceOfBank();
 
 	myBank->mainMenu();
 }

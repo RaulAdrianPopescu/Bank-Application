@@ -36,7 +36,7 @@ Bank::Bank()
 
            std::string sUserName, sUserPassword;
            std::cout << "Introduceti numele de utilizator: "; std::cin >> sUserName;
-           std::cout << "Introduceti parola: "; std::cin >> sUserPassword;
+           std::cout << "Introduceti parola:               "; std::cin >> sUserPassword;
 
            currentLogin = new UserAccount(sUserName, sUserPassword);
            if (!(currentLogin->bIsUserNameValid(currentLogin->sGetUserName())) || !(currentLogin->bIsUserPasswordValid(currentLogin->sGetUserPassword())))
@@ -180,9 +180,9 @@ void Bank::SeeAccounts()
         std::cout.width(8); std::cout << std::left << "ID";
         std::cout.width(15); std::cout << std::left << "Prenume";
         std::cout.width(15); std::cout << std::left << "Nume";
-        std::cout.width(24); std::cout << std::left << "Moneda";
+        std::cout.width(15); std::cout << std::left << "Moneda";
         std::cout.width(28); std::cout << std::left << "IBAN";
-        std::cout.width(15); std::cout << std::left << "Sold";
+        std::cout.width(17); std::cout << std::left << "Sold";
         std::cout << "\n\n";
 
         for (auto iter = entries.begin(); iter < entries.end(); iter++)
@@ -190,9 +190,9 @@ void Bank::SeeAccounts()
             std::cout.width(8); std::cout << std::left << iter->first;
             std::cout.width(15); std::cout << std::left << iter->second->sGetName();
             std::cout.width(15); std::cout << std::left << iter->second->sGetSurname();
-            std::cout.width(24); std::cout << std::left << iter->second->sGetCurrencyAsString();
+            std::cout.width(15); std::cout << std::left << iter->second->sGetCurrencyAsString();
             std::cout.width(28); std::cout << std::left << iter->second->sGetIban();
-            std::cout.width(15); std::cout << std::left << iter->second->fGetBalance();
+            std::cout.width(17); std::cout << std::left << std::fixed << std::showpoint << std::setprecision(2) << iter->second->fGetBalance();
             std::cout << "\n";
         }
     }
@@ -247,7 +247,7 @@ void Bank::mainMenu()
     }
 }
 
-Bank* Bank::getInstanceOfBank()
+Bank* Bank::GetInstanceOfBank()
 {
     if (instanceOfBank == nullptr)
         instanceOfBank = new Bank();
@@ -305,9 +305,9 @@ void Bank::ModifyAccount()
             std::cout.width(8); std::cout << std::left << "ID";
             std::cout.width(15); std::cout << std::left << "Prenume";
             std::cout.width(15); std::cout << std::left << "Nume";
-            std::cout.width(24); std::cout << std::left << "Moneda";
+            std::cout.width(15); std::cout << std::left << "Moneda";
             std::cout.width(28); std::cout << std::left << "IBAN";
-            std::cout.width(15); std::cout << std::left << "Sold";
+            std::cout.width(17); std::cout << std::left << "Sold";
             std::cout << "\n\n";
 
             for (auto iter = databaseEntries.begin(); iter < databaseEntries.end(); iter++)
@@ -315,9 +315,9 @@ void Bank::ModifyAccount()
                 std::cout.width(8); std::cout << std::left << iter->first;
                 std::cout.width(15); std::cout << std::left << iter->second->sGetName();
                 std::cout.width(15); std::cout << std::left << iter->second->sGetSurname();
-                std::cout.width(24); std::cout << std::left << iter->second->sGetCurrencyAsString();
+                std::cout.width(15); std::cout << std::left << iter->second->sGetCurrencyAsString();
                 std::cout.width(28); std::cout << std::left << iter->second->sGetIban();
-                std::cout.width(15); std::cout << std::left << iter->second->fGetBalance();
+                std::cout.width(17); std::cout << std::left << std::fixed << std::showpoint << std::setprecision(2) << iter->second->fGetBalance();
                 std::cout << "\n";
             }
 
