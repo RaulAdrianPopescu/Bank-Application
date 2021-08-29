@@ -456,8 +456,6 @@ void Bank::AddUserAccount()
 
         if (newUserAccount->bIsUserNameValid(sUserName) && newUserAccount->bIsUserPasswordValid(sUserPassword))
             newUserAccount = new UserAccount(sUserName, sUserPassword);
-
-
     }
 
     int numberUsersBeforeAddingNew = userAccountDatabase->CountUsersRegistered();

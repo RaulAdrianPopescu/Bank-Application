@@ -26,7 +26,7 @@ void FileManagerUserAccounts::AddToFile(UserAccount* newUser)
     std::map <std::string, std::string> dataFromFile = ReadDataFromFile();
 
     if (dataFromFile.find(newUser->sGetUserName()) != dataFromFile.end())
-        std::cout << "\n\nUtilizatorul deja exista. Va rugam incercati un alt nume de utilizator.\n";
+        std::cout << "\nUtilizatorul deja exista. Va rugam incercati un alt nume de utilizator.\n";
     else
     {
         std::pair <std::string, std::string> newUserPair = { newUser->sGetUserName(), newUser->sGetUserPassword() };
@@ -44,7 +44,7 @@ void FileManagerUserAccounts::RemoveFromFile(std::string sEntrySearch)
         if (iter->first == sEntrySearch)
         {
             dataFromFile.erase(sEntrySearch);
-            std::cout << "Utilizatorul a fost sters cu succes!\n";
+            std::cout << "\nUtilizatorul a fost sters cu succes!\n";
             break;
         }
 

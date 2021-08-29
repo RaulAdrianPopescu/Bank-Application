@@ -30,7 +30,7 @@ private:
 	////// FIELD(S)
 	FileManagerBankAccounts* bankAccountDatabase;
 	FileManagerUserAccounts* userAccountDatabase;
-	UserAccount* currentLogin = nullptr;
+	UserAccount* currentLogin;
 
 	static Bank* instanceOfBank;
 };
