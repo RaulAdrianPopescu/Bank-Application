@@ -450,6 +450,7 @@ void Bank::AddUserAccount()
 
     userAccountDatabase->AddToFile(newUserAccount);
 
+    std::cout << "OPERATIUNEA S-A REALIZAT CU SUCCES!\n";
     std::cout << "\n\n1 -> Adaugati un nou cont\n";
     std::cout << "2 -> Mergeti inapoi in meniul principal\n\n";
     std::cout << "Selectie: ";
