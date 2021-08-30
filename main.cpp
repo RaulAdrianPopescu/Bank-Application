@@ -1,9 +1,9 @@
 #include "Bank.h"
 
+Bank* Bank::instanceOfBank = 0;
 int main()
 {
-    Bank* itSchoolBank = new Bank();
-    
+	Bank* myBank = myBank->GetInstanceOfBank();
 
-    delete itSchoolBank;
+	myBank->mainMenu();
 }
