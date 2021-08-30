@@ -249,24 +249,3 @@ void FileManagerBankAccounts::MergeNewDataWithFile(std::vector<BankAccount*> dat
 
     inputFile.open(fileName, std::ios::in);
 }
-
-bool FileManagerBankAccounts::IsInFile(std::string sSearchTerm)
-{
-    std::vector<BankAccount*> dataFromFile = ReadDataFromFile();
-    bool isInFile = false;
-
-    for (auto iter = dataFromFile.begin(); iter != dataFromFile.end(); iter++)
-    {
-        std::string dataNameSurname = ((*iter)->sGetName()).append(" ");
-        dataNameSurname.append((*iter)->sGetSurname());
-
-        if (dataNameSurname.compare(sSearchTerm) == 0)
-        {
-            isInFile = true;
-            break;
-        }
-    }
-
-    MergeNewDataWithFile(dataFromFile);
-    return isInFile;
-}

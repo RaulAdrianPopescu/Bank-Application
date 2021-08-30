@@ -104,32 +104,3 @@ bool UserAccount::bIsUserPasswordValid(std::string sInputPassword)
     }
     return true;
 }
-
-bool UserAccount::bDoesAccountHaveAccess(UserAccount* adminAccount)
-{
-    if (!(bIsUserNameValid(this->sGetUserName())) || !(bIsUserPasswordValid(this->sGetUserPassword())))
-    {
-        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
-        system("pause > nul");
-        system("CLS");
-        return false;
-    }
-    else if (adminAccount->sGetUserName() != this->sGetUserName())
-    {
-        std::cout << "\nNumele/parola contului este incorect(a).";
-        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
-        system("pause > nul");
-        system("CLS");
-        return false;
-    }
-    else if (adminAccount->sGetUserPassword() != this->sGetUserPassword())
-    {
-        std::cout << "\nNumele/parola contului este incorect(a).";
-        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA...\n\n";
-        system("pause > nul");
-        system("CLS");
-        return false;
-    }
-    else
-        return true;
-}

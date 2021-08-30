@@ -97,20 +97,3 @@ bool bank_utilities::IsValidBalance(std::string sBalance)
 
 	return true;
 }
-
-void bank_utilities::ClearBankAccounts(std::vector<std::pair<int, BankAccount*>> entries)
-{
-	for (auto iter = entries.begin(); iter != entries.end(); iter++)
-	{
-		BankAccount* ptr = iter->second;
-		delete ptr;
-	}
-
-	entries.clear();
-}
-
-void bank_utilities::ClearBankAccounts(BankAccount* entry)
-{
-	if (entry != nullptr)
-		delete entry;
-}
