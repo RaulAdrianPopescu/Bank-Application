@@ -5,8 +5,8 @@
 ////// CONSTRUCTOR(S)
 Bank::Bank() 
 {
-   bankAccountDatabase = new FileManagerBankAccounts("bank_accounts.csv");
-   userAccountDatabase = new FileManagerUserAccounts("user_accounts.csv");
+   bankAccountDatabase = std::make_unique<FileManagerBankAccounts>("bank_accounts.csv");
+   userAccountDatabase = std::make_unique<FileManagerUserAccounts>("user_accounts.csv");
 
    if (!userAccountDatabase->HasUserAccounts())
    {
@@ -15,10 +15,8 @@ Bank::Bank()
        std::cout << "\n\nAPASATI ORICE TASTA PENTRU A CONTINUA...";
        system("pause > nul");
 
-       currentLogin = new UserAccount();
+       currentLogin = std::make_unique<UserAccount>();
        userAccountDatabase->AddToFile(currentLogin);
-
-       delete currentLogin;
    }
    else
    {
@@ -31,20 +29,21 @@ Bank::Bank()
            if (iLoginAttempts != 4)
                std::cout << "Informatiile introduse nu sunt corecte, te rugam sa reincerci. Incercari ramase: " << iLoginAttempts << "\n\n";
 
-           if (currentLogin != nullptr)
-               delete currentLogin;
-
            std::string sUserName, sUserPassword;
            std::cout << "Introduceti numele de utilizator: "; std::cin >> sUserName;
            std::cout << "Introduceti parola:               "; std::cin >> sUserPassword;
 
-           currentLogin = new UserAccount(sUserName, sUserPassword);
-           if (!(currentLogin->bIsUserNameValid(currentLogin->sGetUserName())) || !(currentLogin->bIsUserPasswordValid(currentLogin->sGetUserPassword())))
+           std::shared_ptr<UserAccount> loginAttempt = std::make_unique<UserAccount>(sUserName, sUserPassword);
+
+           if (!(loginAttempt->bIsUserNameValid(loginAttempt->sGetUserName())) || !(loginAttempt->bIsUserPasswordValid(loginAttempt->sGetUserPassword())))
                iLoginAttempts--;
-           else if (!(userAccountDatabase->IsAccessAllowed(currentLogin)))
+           else if (!(userAccountDatabase->IsAccessAllowed(loginAttempt)))
                iLoginAttempts--;
            else
+           {
+               currentLogin = std::move(loginAttempt);
                break;
+           }
        }
 
        if (iLoginAttempts == 0)
@@ -55,9 +54,6 @@ Bank::Bank()
 ////// DESTRUCTOR
 Bank::~Bank() 
 {
-    delete userAccountDatabase;
-    delete bankAccountDatabase;
-    delete currentLogin;
 }
 
 ////// METHOD(S)
@@ -104,16 +100,15 @@ void Bank::AddAccount()
         sIban = sCreateIban();
     }
 
-	BankAccount* newAccount = new BankAccount(sName, sSurname, sIban);
+	std::shared_ptr<BankAccount> newAccount = std::make_unique<BankAccount>(sName, sSurname, sIban);
     newAccount->SetCurrencyFromIban();
 	bankAccountDatabase->AddToFile(newAccount);
-    delete newAccount;
 
     std::cout << "\n1 -> Pentru a mai adauga un cont\n";
     std::cout << "2 -> Pentru a reveni in meniul principal\n";
+
     int iOption = 0;
     std::cout << "\nSelectie: "; std::cin >> iOption;
-
     
     switch (iOption)
     {
@@ -172,7 +167,7 @@ std::string Bank::sCreateIban()
 void Bank::SeeAccounts()
 {
 	std::cout << "Numarul de conturi din baza de date a bancii este: " << bankAccountDatabase->CountEntries();
-    std::vector<std::pair<int, BankAccount*>> entries = bankAccountDatabase->ReturnAllEntriesWithIds();
+    std::vector<std::pair< int, std::shared_ptr<BankAccount> >> entries = bankAccountDatabase->ReturnAllEntriesWithIds();
 	std::cout << "\n\n";
 
     if (!entries.empty())
@@ -247,12 +242,12 @@ void Bank::mainMenu()
     }
 }
 
-Bank* Bank::GetInstanceOfBank()
+std::unique_ptr<Bank> Bank::GetInstanceOfBank()
 {
     if (instanceOfBank == nullptr)
-        instanceOfBank = new Bank();
+        instanceOfBank = std::make_unique<Bank>();
 
-    return instanceOfBank;
+    return std::move(instanceOfBank);
 }
 
 void Bank::ModifyAccount()
@@ -266,7 +261,7 @@ void Bank::ModifyAccount()
 
     } while (!(bank_utilities::IsValidNameOrSurname(sName) && bank_utilities::IsValidNameOrSurname(sSurname)));
         
-    std::vector<std::pair<int,BankAccount*>> databaseEntries (bankAccountDatabase->FindEntriesInFile(sName + " " + sSurname));
+    std::vector<std::pair<int, std::shared_ptr<BankAccount>>> databaseEntries (bankAccountDatabase->FindEntriesInFile(sName + " " + sSurname));
 
     if (databaseEntries.size() == 0)
     {
@@ -295,7 +290,7 @@ void Bank::ModifyAccount()
     else
     {
         int iSelectedEntryId;
-        BankAccount* tempBankAccount = nullptr;
+        std::shared_ptr<BankAccount> tempBankAccount = nullptr;
 
         if (databaseEntries.size() > 1)
         {
@@ -335,7 +330,7 @@ void Bank::ModifyAccount()
         else
         {
             iSelectedEntryId = databaseEntries.begin()->first;
-            tempBankAccount = databaseEntries.begin()->second;
+            tempBankAccount = std::move(databaseEntries.begin()->second);
         }
 
         system("CLS");
@@ -365,7 +360,6 @@ void Bank::ModifyAccount()
 
                 tempBankAccount->sSetName(sNewAccName);
                 bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
-                delete tempBankAccount;
 
                 std::cout << "\nPrenumele a fost modificat cu succes!";
                 std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
@@ -386,7 +380,6 @@ void Bank::ModifyAccount()
 
                 tempBankAccount->sSetSurname(sNewAccSurname);
                 bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
-                delete tempBankAccount;
 
                 std::cout << "\nNumele a fost modificat cu succes!";
                 std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
@@ -406,7 +399,6 @@ void Bank::ModifyAccount()
 
                 tempBankAccount->fSetBalance(std::stod(sNewAccBalance));
                 bankAccountDatabase->UpdateEntry(iSelectedEntryId, tempBankAccount);
-                delete tempBankAccount;
 
                 std::cout << "\nSoldul a fost modificat cu succes!";
                 std::cout << "\n\nAPASATI ORICE TASTA PENTRU A VA INTOARCE IN MENIUL PRINCIPAL...";
@@ -420,16 +412,14 @@ void Bank::ModifyAccount()
                 std::cout << "Pentru aceasta operatiune, va rugam sa introduceti din nou numele de utilizator si parola.\n\n";
                 std::cout << "Username: "; std::cin >> sUserName;
                 std::cout << "Password: "; std::cin >> sUserPassword;
-                UserAccount* userToValidate = new UserAccount(sUserName, sUserPassword);
+                std::shared_ptr<UserAccount>userToValidate = std::make_unique<UserAccount>(sUserName, sUserPassword);
                 if (currentLogin->sGetUserName() == userToValidate->sGetUserName() && currentLogin->sGetUserPassword() == userToValidate->sGetUserPassword())
                 {
-                    delete userToValidate;
                     bankAccountDatabase->RemoveFromFile(tempBankAccount);
                     std::cout << "\nCONTUL A FOST STERS!\n";
                 }
                 else
                 {
-                    delete userToValidate;
                     std::cout << "\nACTIUNEA A ESUAT! APLICATIA SE VA INCHIDE...\n";
                     std::exit(1); // 1 - ACTION DENIED, EMERGENCY SHUTDOWN
                 }
@@ -447,7 +437,7 @@ void Bank::AddUserAccount()
 {
     system("cls");
     std::string sUserName, sUserPassword;
-    UserAccount* newUserAccount = nullptr;
+    std::shared_ptr<UserAccount> newUserAccount = nullptr;
 
     while (newUserAccount == nullptr)
     {
@@ -455,7 +445,13 @@ void Bank::AddUserAccount()
         std::cout << "Alegeti o parola:              "; std::cin >> sUserPassword;
 
         if (newUserAccount->bIsUserNameValid(sUserName) && newUserAccount->bIsUserPasswordValid(sUserPassword))
-            newUserAccount = new UserAccount(sUserName, sUserPassword);
+            newUserAccount = std::make_unique<UserAccount>(sUserName, sUserPassword);
+        else
+        {
+            std::cout << "\n\nAPASATI ORICE TASTA PENTRU A REINCERCA....\n\n";
+            system("pause>nul");
+            system("cls");
+        }
     }
 
     int numberUsersBeforeAddingNew = userAccountDatabase->CountUsersRegistered();

@@ -10,11 +10,11 @@ public:
 	Bank();								// Constructor-ul va deschide bazele de date de pe care operam si va servi drept meniu de login pentru aplicatie
 
 	////// DESTRUCTOR
-	~Bank();							// Destructor-ul va inchide bazele de date pe care le manipulam si va sterge contul curent de utilizator
+	~Bank();							// Default destructor
 
 	////// METHOD(S)
-	void mainMenu();					// Metoda prin care accesam meniul principal al aplicatiei
-	static Bank* GetInstanceOfBank();   // Getter pentru static pointer-ul din singleton
+	void mainMenu();							 // Metoda prin care accesam meniul principal al aplicatiei
+	std::unique_ptr<Bank> GetInstanceOfBank();     // Getter pentru pointer-ul din singleton
 
 private:
 
@@ -28,9 +28,8 @@ private:
 	std::string sCreateIban();          // Metoda prin care generam un cod IBAN de 24 de caractere bazat pe moneda aleasa la creerea contului
 
 	////// FIELD(S)
-	FileManagerBankAccounts* bankAccountDatabase;  // Un obiect ce ne permite manipularea bazei de date a conturilor bancare
-	FileManagerUserAccounts* userAccountDatabase;  // Un obiect ce ne permite manipularea bazei de date a conturilor de utilizatori
-	UserAccount* currentLogin;					   // Un obiect in care stocam contul de login la intrarea in aplicatie
-
-	static Bank* instanceOfBank;				   // Static pointer ce reprezinta o singura instanta a bancii
+	std::unique_ptr<FileManagerBankAccounts> bankAccountDatabase;  // Un obiect ce ne permite manipularea bazei de date a conturilor bancare
+	std::unique_ptr<FileManagerUserAccounts> userAccountDatabase;  // Un obiect ce ne permite manipularea bazei de date a conturilor de utilizatori
+	std::shared_ptr<UserAccount> currentLogin;					   // Un obiect in care stocam contul de login la intrarea in aplicatie
+	static std::unique_ptr<Bank> instanceOfBank;						   // Shared pointer ce reprezinta o singura instanta a bancii
 };

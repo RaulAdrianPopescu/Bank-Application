@@ -1,9 +1,9 @@
 #include "Bank.h"
 
-Bank* Bank::instanceOfBank = 0;
+std::unique_ptr<Bank> Bank::instanceOfBank = 0;
 int main()
 {
-	Bank* myBank = myBank->GetInstanceOfBank();
+	std::unique_ptr<Bank> myBank = myBank->GetInstanceOfBank();
 
 	myBank->mainMenu();
 }
