@@ -1,9 +1,9 @@
 #include "Bank.h"
 
-Bank* Bank::instanceOfBank = 0;
+std::shared_ptr<Bank> Bank::instanceOfBank = 0;
 int main()
 {
-	Bank* myBank = myBank->GetInstanceOfBank();
+	std::shared_ptr<Bank> myBank = myBank->GetInstanceOfBank();
 
 	myBank->mainMenu();
 }

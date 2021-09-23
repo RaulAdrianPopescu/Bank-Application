@@ -21,7 +21,7 @@ FileManagerUserAccounts::~FileManagerUserAccounts()
 }
 
 ////// PUBLIC METHOD(S) 
-void FileManagerUserAccounts::AddToFile(UserAccount* newUser)
+void FileManagerUserAccounts::AddToFile(std::shared_ptr<UserAccount> newUser)
 {
     std::map <std::string, std::string> dataFromFile = ReadDataFromFile();
 
@@ -52,7 +52,7 @@ void FileManagerUserAccounts::RemoveFromFile(std::string sEntrySearch)
     MergeNewDataWithFile(dataFromFile);
 }
 
-bool FileManagerUserAccounts::IsAccessAllowed(UserAccount* login)
+bool FileManagerUserAccounts::IsAccessAllowed(std::shared_ptr<UserAccount> login)
 {
     std::map<std::string, std::string> users = ReadDataFromFile();
 
@@ -70,7 +70,7 @@ bool FileManagerUserAccounts::IsAccessAllowed(UserAccount* login)
 bool FileManagerUserAccounts::HasUserAccounts()
 {
     int countEntries = CountUsersRegistered();
-    return (countEntries > 0) ? true : false;
+    return countEntries > 0;
 }
 
 int FileManagerUserAccounts::CountUsersRegistered()
@@ -128,23 +128,22 @@ FileManagerBankAccounts::~FileManagerBankAccounts()
 }
 
 ////// PUBLIC METHOD(S)
-void FileManagerBankAccounts::AddToFile(BankAccount* newBankAccount)
+void FileManagerBankAccounts::AddToFile(std::shared_ptr<BankAccount> newBankAccount)
 {
-    std::vector<BankAccount*> dataFromFile = ReadDataFromFile();
+    std::vector< std::shared_ptr<BankAccount> > dataFromFile = ReadDataFromFile();
     dataFromFile.push_back(newBankAccount);
 
     MergeNewDataWithFile(dataFromFile);
 }
 
-void FileManagerBankAccounts::RemoveFromFile(BankAccount* currentAccount)
+void FileManagerBankAccounts::RemoveFromFile(std::shared_ptr<BankAccount> currentAccount)
 {
-    std::vector<BankAccount*> dataFromFile = ReadDataFromFile();
+    std::vector< std::shared_ptr<BankAccount> > dataFromFile = ReadDataFromFile();
 
     for (auto iter = dataFromFile.begin(); iter != dataFromFile.end(); iter++)
         if ((*iter)->sGetIban() == currentAccount->sGetIban())
         {
-            BankAccount* toRemove = *iter;
-            delete toRemove;
+            std::shared_ptr<BankAccount> toRemove = *iter;
             dataFromFile.erase(iter);
             break;
         }
@@ -152,10 +151,10 @@ void FileManagerBankAccounts::RemoveFromFile(BankAccount* currentAccount)
     MergeNewDataWithFile(dataFromFile);
 }
 
-std::vector<std::pair<int, BankAccount*>> FileManagerBankAccounts::FindEntriesInFile(std::string sSearchTerm)
+std::vector<std::pair< int, std::shared_ptr<BankAccount> >> FileManagerBankAccounts::FindEntriesInFile(std::string sSearchTerm)
 {
-    std::vector<BankAccount*> dataFromFile = ReadDataFromFile();
-    std::vector<std::pair<int, BankAccount*>> accountsFound;
+    std::vector< std::shared_ptr<BankAccount> > dataFromFile = ReadDataFromFile();
+    std::vector<std::pair< int, std::shared_ptr<BankAccount> >> accountsFound;
 
     for (int i = 0; i < dataFromFile.size(); i++)
     {
@@ -167,42 +166,44 @@ std::vector<std::pair<int, BankAccount*>> FileManagerBankAccounts::FindEntriesIn
     }
 
     MergeNewDataWithFile(dataFromFile);
+
     return accountsFound;
 }
 
-std::vector<std::pair<int, BankAccount*>> FileManagerBankAccounts::ReturnAllEntriesWithIds()
+std::vector<std::pair <int, std::shared_ptr<BankAccount> >> FileManagerBankAccounts::ReturnAllEntriesWithIds()
 {
-    std::vector<BankAccount*> entries = ReadDataFromFile();
-    std::vector<std::pair<int, BankAccount*>> entriesWithId;
+    std::vector< std::shared_ptr<BankAccount> > entries = ReadDataFromFile();
+    std::vector< std::pair< int, std::shared_ptr<BankAccount> >> entriesWithId;
 
     if (!entries.empty())
         for (int i = 0; i < entries.size(); i++)
             entriesWithId.push_back({ i + 1, entries.at(i) });
 
     MergeNewDataWithFile(entries);
+
     return entriesWithId;
 }
 
-void FileManagerBankAccounts::UpdateEntry(int entryId, BankAccount* updatedEntry)
+void FileManagerBankAccounts::UpdateEntry(int entryId, std::shared_ptr<BankAccount> updatedEntry)
 {
-    std::vector<BankAccount*> dataFromFile = ReadDataFromFile();
-    dataFromFile[entryId - 1] = updatedEntry;
+    std::vector< std::shared_ptr<BankAccount> > dataFromFile = ReadDataFromFile();
+    dataFromFile[entryId - 1] = std::move(updatedEntry);
 
     MergeNewDataWithFile(dataFromFile);
 }
 
 int FileManagerBankAccounts::CountEntries()
 {
-    std::vector<BankAccount*> dataFromFile = ReadDataFromFile();
+    std::vector< std::shared_ptr<BankAccount> > dataFromFile = ReadDataFromFile();
     MergeNewDataWithFile(dataFromFile);
 
     return dataFromFile.size();
 }
 
 ////// PRIVATE METHOD(S)
-std::vector<BankAccount*> FileManagerBankAccounts::ReadDataFromFile()
+std::vector< std::shared_ptr<BankAccount> > FileManagerBankAccounts::ReadDataFromFile()
 {
-    std::vector<BankAccount*> fileData;
+    std::vector< std::shared_ptr<BankAccount> > fileData;
     std::string sDataFieldFromFile;
 
     while (std::getline(inputFile, sDataFieldFromFile, '\n'))
@@ -221,31 +222,27 @@ std::vector<BankAccount*> FileManagerBankAccounts::ReadDataFromFile()
 
         double fAccountBalance = std::stod(sDataFieldFromFile.substr(0, std::string::npos));
 
-        BankAccount* bankAccount = new BankAccount(sAccountName, sAccountSurname, eAccountCurrency, sAccountIban, fAccountBalance);
+        std::shared_ptr<BankAccount> bankAccount = std::make_unique<BankAccount>(sAccountName, sAccountSurname, eAccountCurrency, sAccountIban, fAccountBalance);
         fileData.push_back(bankAccount);
     }
 
     return fileData;
 }
 
-void FileManagerBankAccounts::MergeNewDataWithFile(std::vector<BankAccount*> data)
+void FileManagerBankAccounts::MergeNewDataWithFile(std::vector< std::shared_ptr<BankAccount> > data)
 {
     std::string outputDataFileName = "new_" + fileName;
     std::ofstream outputFile(outputDataFileName);
 
     for (auto iter = data.begin(); iter != data.end(); iter++)
-    {
         outputFile << (*iter)->sGetName() << ',' << (*iter)->sGetSurname() << ',' << std::to_string((int)((*iter)->eGetCurrency())) << ','
-            << (*iter)->sGetIban() << ',' << std::to_string((*iter)->fGetBalance()) << '\n';
+                   << (*iter)->sGetIban() << ',' << std::to_string((*iter)->fGetBalance()) << '\n';
 
-    }
     inputFile.close();
     outputFile.close();
 
-
     std::remove(fileName.c_str());
     std::rename(outputDataFileName.c_str(), fileName.c_str());
-
 
     inputFile.open(fileName, std::ios::in);
 }
