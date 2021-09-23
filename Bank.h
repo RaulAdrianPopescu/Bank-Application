@@ -13,8 +13,8 @@ public:
 	~Bank();							// Default destructor
 
 	////// METHOD(S)
-	void mainMenu();							 // Metoda prin care accesam meniul principal al aplicatiei
-	std::unique_ptr<Bank> GetInstanceOfBank();     // Getter pentru pointer-ul din singleton
+	void mainMenu();							   // Metoda prin care accesam meniul principal al aplicatiei
+	std::shared_ptr<Bank> GetInstanceOfBank();     // Getter pentru pointer-ul din singleton
 
 private:
 
@@ -31,5 +31,5 @@ private:
 	std::unique_ptr<FileManagerBankAccounts> bankAccountDatabase;  // Un obiect ce ne permite manipularea bazei de date a conturilor bancare
 	std::unique_ptr<FileManagerUserAccounts> userAccountDatabase;  // Un obiect ce ne permite manipularea bazei de date a conturilor de utilizatori
 	std::shared_ptr<UserAccount> currentLogin;					   // Un obiect in care stocam contul de login la intrarea in aplicatie
-	static std::unique_ptr<Bank> instanceOfBank;						   // Shared pointer ce reprezinta o singura instanta a bancii
+	static std::shared_ptr<Bank> instanceOfBank;				   // Unique pointer ce reprezinta o singura instanta a bancii
 };

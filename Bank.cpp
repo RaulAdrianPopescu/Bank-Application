@@ -242,12 +242,12 @@ void Bank::mainMenu()
     }
 }
 
-std::unique_ptr<Bank> Bank::GetInstanceOfBank()
+std::shared_ptr<Bank> Bank::GetInstanceOfBank()
 {
     if (instanceOfBank == nullptr)
         instanceOfBank = std::make_unique<Bank>();
 
-    return std::move(instanceOfBank);
+    return instanceOfBank;
 }
 
 void Bank::ModifyAccount()
