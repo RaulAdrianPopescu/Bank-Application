@@ -6,17 +6,17 @@ class Bank
 {
 public:
 
-	////// CONSTRUCTOR(S)
-	Bank();								// Constructor-ul va deschide bazele de date de pe care operam si va servi drept meniu de login pentru aplicatie
-
 	////// DESTRUCTOR
-	~Bank();							// Default destructor
+	~Bank();											  // Default destructor
 
 	////// METHOD(S)
-	void mainMenu();							   // Metoda prin care accesam meniul principal al aplicatiei
-	std::shared_ptr<Bank> GetInstanceOfBank();     // Getter pentru pointer-ul din singleton
+	void mainMenu();									  // Metoda prin care accesam meniul principal al aplicatiei
+	static std::shared_ptr<Bank> GetInstanceOfBank();     // Getter pentru pointer-ul din singleton
 
 private:
+
+	////// CONSTRUCTOR(S)
+	Bank();								// Constructor-ul va deschide bazele de date de pe care operam si va servi drept meniu de login pentru aplicatie
 
 	////// METHOD(S)
 	CURRENCY eSelectCurrency();			// Metoda prin care selectam moneda in care va fi generat IBAN-ul

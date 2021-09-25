@@ -245,7 +245,10 @@ void Bank::mainMenu()
 std::shared_ptr<Bank> Bank::GetInstanceOfBank()
 {
     if (instanceOfBank == nullptr)
-        instanceOfBank = std::make_unique<Bank>();
+    {
+        std::unique_ptr<Bank> temp(new Bank);
+        instanceOfBank = std::move(temp);
+    }
 
     return instanceOfBank;
 }
